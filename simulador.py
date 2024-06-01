@@ -9,33 +9,41 @@ def lerJson(file_path):
 def lerCsv(file_path):
     with open(file_path, 'r') as f:
         reader = csv.reader(f, delimiter=';')
-        return [row[0] for row in reader]
+        return [row for row in reader]
 
 def simular(automato, input_string):
-    estadoAtual = automato['initial']
+    estados_ativos = {automato['initial']}
     for read in input_string:
-        transitions = automato['transitions']
-        for transition in transitions:
-            if transition['from'] == estadoAtual and transition['read'] == read:
-                estadoAtual = transition['to']
-                break
-        else:
+        novos_estados_ativos = set()
+        for estado in estados_ativos:
+            for transition in automato['transitions']:
+                if transition['from'] == estado and transition['read'] == read:
+                    novos_estados_ativos.add(transition['to'])
+        if not novos_estados_ativos:
             return 0  
-    return 1 if estadoAtual in automato['final'] else 0  
+        estados_ativos = novos_estados_ativos
+    return 1 if any(state in automato['final'] for state in estados_ativos) else 0
 
 def main():
-    aut = lerJson('Exemplos/ex2.json')
-    entradas = lerCsv('Exemplos/ex2_input.csv')
+    automatos = ['Exemplos/ex1.json', 'Exemplos/ex2.json', 'Exemplos/ex3.json']
+    entradas = ['Exemplos/ex1_input.csv', 'Exemplos/ex2_input.csv', 'Exemplos/ex3_input.csv']
+    
+    for aut_file, input_file in zip(automatos, entradas):
+        print(f"{aut_file} e {input_file}")
+        aut = lerJson(aut_file)
+        entradas = lerCsv(input_file)
 
-    start_time = time.time()
+        start_time = time.time()
 
-    for input_string in entradas:
-        aceita = simular(aut, input_string)
-        print(f"Entrada: {input_string} - Aceita: {aceita}")
+        for row in entradas:
+            input_string = row[0]
+            expected = int(row[1])
+            aceita = simular(aut, input_string)
+            print(f"Entrada: {input_string} - Aceita: {aceita} - Esperada: {expected}")
 
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Tempo de execução: {elapsed_time:.4f} segundos")
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Tempo de execução: {elapsed_time:.4f} segundos\n")
 
 if __name__ == "__main__":
     main()
