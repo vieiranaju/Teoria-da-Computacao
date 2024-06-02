@@ -3,7 +3,7 @@
 
 ## 🚀 Funcionalidades
 - [x] Deterministico
-- [] Não deterministico (Funciona, mas as vezes da erro)
+- [ ] Não deterministico (Funciona, mas as vezes da erro)
 
 
 ## 💻 Sobre o projeto
