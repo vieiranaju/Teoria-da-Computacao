@@ -1,6 +1,7 @@
 import json
 import csv
 import time
+import sys
 
 def lerJson(file_path):
     with open(file_path, 'r') as f:
@@ -34,28 +35,36 @@ def simular(automato, input_string):
     return 1 if any(state in automato['final'] for state in estados_ativos) else 0
     #No final da leitura, se algum estado na lista de estados atuais for final retorna 0
 
-def main():
-    automatos = ['Exemplos/ex1.json', 'Exemplos/ex2.json', 'Exemplos/ex3.json']
-    entradas = ['Exemplos/ex1_input.csv', 'Exemplos/ex2_input.csv', 'Exemplos/ex3_input.csv']
-    
-    for aut_file, input_file in zip(automatos, entradas):
-        print(f"{aut_file} e {input_file}")
-        aut = lerJson(aut_file)
-        entradas = lerCsv(input_file)
-        #Lê cada um dos arquivos e entradas
+def main(aut_file, input_file, output_file):
+    print(f"{aut_file} e {input_file}")
+    aut = lerJson(aut_file)
+    entradas = lerCsv(input_file)
+    if not entradas:
+        return
 
-        start_time = time.time()
+    try:
+        with open(output_file, 'w', newline='') as arquivo_saida:
+            writer = csv.writer(arquivo_saida, delimiter=';')
+            for row in entradas:
+                input_string = row[0]
+                expected = int(row[1])
+                start_time = time.time()
+                aceita = simular(aut, input_string)
+                end_time = time.time()
+                elapsed_time = end_time - start_time
 
-        for row in entradas:
-            input_string = row[0]
-            expected = int(row[1])
-            aceita = simular(aut, input_string)
-            print(f"Entrada: {input_string} - Aceita: {aceita} - Esperada: {expected}")
-            #Verifica cada elemento da lista de palavras e simula o automato correspondente
+                writer.writerow([input_string, expected, aceita, f"{elapsed_time:.6f}"])
+                print(f"Entrada: {input_string} - Aceita: {aceita} - Esperada: {expected} - Tempo: {elapsed_time:.6f} segundos")
+    except Exception as e:
+        print(f"Erro ao escrever no arquivo de saída {output_file}: {e}")
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        print(f"Tempo de execução: {elapsed_time:.4f} segundos\n")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 3:
+        print("Uso: python simulador.py <arquivo_do_automato.aut> <arquivo_de_testes.in> <arquivo_de_saida.out>")
+        sys.exit(1)
+    
+    aut_file = sys.argv[1]
+    input_file = sys.argv[2]
+    output_file = sys.argv[3]
+    main(aut_file, input_file, output_file)
