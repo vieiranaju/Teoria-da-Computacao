@@ -6,6 +6,9 @@
 - [ ] Não deterministico (Funciona, mas as vezes da erro)
 
 
+O código contém uma função para leitura de arquivos JSON, uma pra CSV, duas funções para verificar estados, sendo uma delas direcionada a estados vazios, uma função de simular, que verifica todas as possiveis transções para cada simbolo lido passsando pelas verificações de novos estados e adicionando a uma lista de estados atuais, caso tenham mais de um, e então retorna 1 para caso exista um estado final correspondente ao resultado, e 0 caso não. A função main recebe como parâmetro os arquivos que serão utilizadas, e faz a leitura dos mesmos, e então escreve os resultados da simulação junto ao tempo de execução no arquivo de saida. 
+
+
 ## 💻 Sobre o projeto
 
 A ferramenta recebe um arquivo do tipo JSON com as especificações do automato desejado no seguinte padrão:
