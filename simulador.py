@@ -13,30 +13,30 @@ def lerCsv(file_path):
         return [row for row in reader]
     #Retorna uma lista com as palavras 
 
-def simular(automato, input_string):
-    estados_ativos = {automato['initial']}
+def simular_automato(automato, input):
+    estados_atuais = {automato['initial']}
 
     #Para cada simbolo lido cria um conjunto de estados ativos
-    for read in input_string:
-        novos_estados_ativos = set()
+    for read in input:
+        novos_estados = set()
 
         #Verifica as possiveis transições
-        for estado in estados_ativos:
+        for estado in estados_atuais:
             for transition in automato['transitions']:
                 if transition['from'] == estado and transition['read'] == read:
-                    novos_estados_ativos.add(transition['to'])
+                    novos_estados.add(transition['to'])
                     #Adiciona o novo estado no conjunto caso seja possivel atualizar
 
-        if not novos_estados_ativos:
+        if not novos_estados:
             return 0  
-        estados_ativos = novos_estados_ativos
+        estados_atuais = novos_estados
         #Novos estados passam a ser o estado atual pro proximo simbolo
 
-    return 1 if any(state in automato['final'] for state in estados_ativos) else 0
+    return 1 if any(state in automato['final'] for state in estados_atuais) else 0
     #No final da leitura, se algum estado na lista de estados atuais for final retorna 0
 
 def main(aut_file, input_file, output_file):
-    print(f"{aut_file} e {input_file}")
+
     aut = lerJson(aut_file)
     entradas = lerCsv(input_file)
     if not entradas:
@@ -45,18 +45,19 @@ def main(aut_file, input_file, output_file):
     try:
         with open(output_file, 'w', newline='') as arquivo_saida:
             writer = csv.writer(arquivo_saida, delimiter=';')
-            for row in entradas:
-                input_string = row[0]
-                expected = int(row[1])
-                start_time = time.time()
-                aceita = simular(aut, input_string)
-                end_time = time.time()
-                elapsed_time = end_time - start_time
 
-                writer.writerow([input_string, expected, aceita, f"{elapsed_time:.6f}"])
-                print(f"Entrada: {input_string} - Aceita: {aceita} - Esperada: {expected} - Tempo: {elapsed_time:.6f} segundos")
+            for row in entradas:
+                input = row[0]
+                expected = int(row[1])
+                inicio = time.time()
+                aceita = simular_automato(aut, input)
+                fim = time.time()
+                tempo = fim - inicio
+
+                writer.writerow([input, expected, aceita, f"{tempo:.6f}"])
+                
     except Exception as e:
-        print(f"Erro ao escrever no arquivo de saída {output_file}: {e}")
+        print(f"Erro no arquivo de saída {output_file}: {e}")
 
 
 if __name__ == "__main__":
