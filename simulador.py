@@ -23,24 +23,36 @@ def atualizar_estados(estado_atual, automato, read):
 
     return novos_estados
 
-def simular_automato(aut, input):
-    estados_atuais = {aut['initial']}
+def atualizar_estados_nulos(estados, automato):
+    novos_estados = set()
 
-    #Para cada simbolo lido cria um conjunto de estados ativos
-    for read in input:
+    for estado in estados:
+        for transicao in automato['transitions']:
+            if transicao['from'] == estado and transicao['read'] is None:
+                novos_estados.add(transicao['to'])
+
+    return novos_estados
+
+def simular_automato(automato, entrada):
+    estados_atuais = {automato['initial']}
+
+    for read in entrada:
         novos_estados = set()
 
-        #Verifica as possiveis transições
+        estados_atuais.update(atualizar_estados_nulos(estados_atuais, automato))
+        
         for estado in estados_atuais:
-            novos_estados.update(atualizar_estados(estado, aut, read))
+            novos_estados.update(atualizar_estados(estado, automato, read))
+
 
         if not novos_estados:
-            return 0  
-        estados_atuais = novos_estados
-        #Novos estados passam a ser o estado atual pro proximo simbolo
+            return 0
 
-    return 1 if any(state in aut['final'] for state in estados_atuais) else 0
-    #No final da leitura, se algum estado na lista de estados atuais for final retorna 1
+        estados_atuais = novos_estados
+
+    # Verifica se algum dos estados atuais é um estado final
+    return 1 if any(estado in automato['final'] for estado in estados_atuais) else 0
+
 
 def main(aut_file, input_file, output_file):
 
