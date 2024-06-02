@@ -13,8 +13,18 @@ def lerCsv(file_path):
         return [row for row in reader]
     #Retorna uma lista com as palavras 
 
-def simular_automato(automato, input):
-    estados_atuais = {automato['initial']}
+def atualizar_estados(estado_atual, automato, read):
+    novos_estados = set()
+
+    for transition in automato['transitions']:
+        if transition['from'] == estado_atual and transition['read'] == read:
+            novos_estados.add(transition['to'])
+            #Adiciona o novo estado no conjunto caso seja possivel atualizar
+
+    return novos_estados
+
+def simular_automato(aut, input):
+    estados_atuais = {aut['initial']}
 
     #Para cada simbolo lido cria um conjunto de estados ativos
     for read in input:
@@ -22,18 +32,15 @@ def simular_automato(automato, input):
 
         #Verifica as possiveis transições
         for estado in estados_atuais:
-            for transition in automato['transitions']:
-                if transition['from'] == estado and transition['read'] == read:
-                    novos_estados.add(transition['to'])
-                    #Adiciona o novo estado no conjunto caso seja possivel atualizar
+            novos_estados.update(atualizar_estados(estado, aut, read))
 
         if not novos_estados:
             return 0  
         estados_atuais = novos_estados
         #Novos estados passam a ser o estado atual pro proximo simbolo
 
-    return 1 if any(state in automato['final'] for state in estados_atuais) else 0
-    #No final da leitura, se algum estado na lista de estados atuais for final retorna 0
+    return 1 if any(state in aut['final'] for state in estados_atuais) else 0
+    #No final da leitura, se algum estado na lista de estados atuais for final retorna 1
 
 def main(aut_file, input_file, output_file):
 
@@ -61,7 +68,7 @@ def main(aut_file, input_file, output_file):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print("Uso: python simulador.py <arquivo_do_automato.aut> <arquivo_de_testes.in> <arquivo_de_saida.out>")
         sys.exit(1)
     
